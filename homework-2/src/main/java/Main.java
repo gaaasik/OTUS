@@ -140,6 +140,6 @@ public class Main {
         compareArrayHalves(array4);
         
         scanner.close();
-        System.out.println("\nПрограмма завершена!");
+        
     }
 }
