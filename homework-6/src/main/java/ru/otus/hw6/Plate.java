@@ -1,19 +1,24 @@
 package ru.otus.hw6;
 
 public class Plate {
+    private int maxFood;
     private int food;
 
-    public Plate(int food) {
-        this.food = food;
+    public Plate(int volume) {
+        this.maxFood = volume;
+        this.food = volume;
     }
 
     public void addFood(int amount) {
-        food = food + amount;
+        food += amount;
+        if (food > maxFood) {
+            food = maxFood;
+        }
     }
 
     public boolean decreaseFood(int amount) {
         if (food >= amount) {
-            food = food - amount;
+            food -= amount;
             return true;
         }
         return false;
