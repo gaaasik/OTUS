@@ -48,12 +48,21 @@ homework-18/
 
 ## Запуск
 
+### 0. Скачать SQLite JDBC драйвер
+
+```bash
+cd homework-18
+wget https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar -O sqlite-jdbc.jar
+```
+
+---
+
 ### 1. Запуск сервера
 
 ```bash
 cd homework-18/server/src/main/java
-javac ru/otus/chat/server/*.java
-java -cp . ru.otus.chat.server.ServerApp
+javac -cp ../../../sqlite-jdbc.jar ru/otus/chat/server/*.java
+java -cp ../../../sqlite-jdbc.jar:. ru.otus.chat.server.ServerApp
 ```
 
 Сервер запустится на порту **8189**.  
@@ -61,7 +70,7 @@ java -cp . ru.otus.chat.server.ServerApp
 
 ---
 
-### 2. Запуск клиента
+### 2. Запуск клиента (в новом терминале)
 
 ```bash
 cd homework-18/client/src/main/java
