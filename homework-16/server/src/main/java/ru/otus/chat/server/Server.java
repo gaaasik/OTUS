@@ -1,0 +1,84 @@
+package ru.otus.chat.server;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class Server {
+    private int port;
+
+    private List<ClientHandler> clients;
+
+    public Server(int port) {
+        this.port = port;
+        clients = new CopyOnWriteArrayList<>();
+    }
+
+    public void start(){
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Сервер запустился на порту: " + port);
+            while (true){
+                Socket socket = serverSocket.accept();
+                subscribe(new ClientHandler(socket, this));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void subscribe(ClientHandler clientHandler){
+        clients.add(clientHandler);
+    }
+
+    public boolean isFirstClient() {
+        return clients.isEmpty();
+    }
+
+    public void unsubscribe(ClientHandler clientHandler){
+        System.out.println("Клиент " + clientHandler.getUsername() + " отключился");
+        clients.remove(clientHandler);
+    }
+
+    public void broadcastMessage(String message){
+        for (ClientHandler c : clients) {
+            c.sendMsg(message);
+        }
+    }
+
+    public void sendPrivateMessage(String from, String to, String message){
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(to)) {
+                c.sendMsg("[Личное от " + from + "]: " + message);
+                return;
+            }
+        }
+        // Если клиент не найден, отправляем сообщение отправителю
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(from)) {
+                c.sendMsg("Пользователь " + to + " не найден");
+                return;
+            }
+        }
+    }
+
+    public void kickUser(String adminUsername, String targetUsername) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(targetUsername)) {
+                c.sendMsg("Вы были отключены администратором " + adminUsername);
+                c.disconnect();
+                broadcastMessage("Пользователь " + targetUsername + " был отключен администратором " + adminUsername);
+                return;
+            }
+        }
+        // Если пользователь не найден
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(adminUsername)) {
+                c.sendMsg("Пользователь " + targetUsername + " не найден");
+                return;
+            }
+        }
+    }
+}
